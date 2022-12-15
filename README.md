@@ -24,6 +24,7 @@ It can be used to keep track of all your items and works with a USB (plug/play) 
   <li>#$2,000-2,999.99  20%</li>
   <li>#$3,000-3,999.99  15%</li>
   <li>#$4,000 or Higher 10%</li>
+  #Located in calculate_sellprice() in AdminMenu.py 
 </ul>
 
 ![Screenshot (25)](https://user-images.githubusercontent.com/115889137/207741161-2d7f9947-78e7-4cbc-810e-84b8ea751485.png)
