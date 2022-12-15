@@ -1,10 +1,12 @@
 # E.I.S
 Electronic Inventory System
 
+<p>
 This is the Electronic Inventory System.
 It can be used to keep track of all your items and works with a USB (plug/play) barcode scanner.
 You can set low quanity reminders for each item's subcategory, that way you can be notified on the program's startup on what needs to be ordered.
 The program also calculates the total prices of your total inventory (with/without markup).
+</p>
 Markup values are hardcoded:
 <ol>
   <li>#Markup Values:</li>
