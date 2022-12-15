@@ -10,6 +10,8 @@ It can be used to keep track of all your items and works with a USB (plug/play) 
   Features:
 <li>You can set low quanity reminders for each item's subcategory, that way you can be notified on the program's startup on what needs to be ordered</li>
 <li>The program also calculates the total prices of your total inventory (with/without markup).</li>
+<li>You can Add/Remove items</li>
+<li>You can Checkout/Return items</li>
 </ul>
 
 <ul>
