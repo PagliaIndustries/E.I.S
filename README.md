@@ -24,9 +24,8 @@ To install this program you can either:
 <li>You can Checkout/Return items</li>
 </ul>
 
-<p>
-  Markup Values are Hardcoded
 <ul>
+Markup Values are Hardcoded
   <li>#Markup Values:</li>
   <li>#0-$49.99         50%</li>
   <li>#$50-149.99       45%</li>
@@ -37,7 +36,6 @@ To install this program you can either:
   <li>#$4,000 or Higher 10%</li>
   #Located in calculate_sellprice() in AdminMenu.py 
 </ul>
-</p>
 
 ![Screenshot (25)](https://user-images.githubusercontent.com/115889137/207741161-2d7f9947-78e7-4cbc-810e-84b8ea751485.png)
 
