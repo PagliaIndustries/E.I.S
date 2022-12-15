@@ -16,11 +16,12 @@ To install this program you can either:
     </ul>
 </p>
 
-<p>The program's default Login is: <br>
+<p><b>
+The program's default Login is: <br>
 Admin<br>
 1234<br>
 (This can be changed in the Settings Menu)
-</p>
+</b></p>
 
 <h3>Features</h3>
 <ul>
