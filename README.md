@@ -1,5 +1,5 @@
 # E.I.S
-Electronic Inventory System
+<h1>Electronic Inventory System</h1>
 
 <p>
 This is the Electronic Inventory System.
