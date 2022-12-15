@@ -6,6 +6,11 @@ This is the Electronic Inventory System.
 It can be used to keep track of all your items and works with a USB (plug/play) barcode scanner.
 </p>
 
+<h2>Install/Setup</h2>
+<p>
+To install this program...
+</p>
+
 <ul>
   Features:
 <li>You can set low quanity reminders for each item's subcategory, that way you can be notified on the program's startup on what needs to be ordered</li>
