@@ -7,14 +7,14 @@ You can set low quanity reminders for each item's subcategory, that way you can 
 The program also calculates the total prices of your total inventory (with/without markup).
 Markup values are hardcoded:
 <ol>
-#Markup Values:
-#0-$49.99         50%
-#$50-149.99       45%
-#$150-999.99      35%
-#$1,000-1,999.99  30%
-#$2,000-2,999.99  20%
-#$3,000-3,999.99  15%
-#$4,000 or Higher 10%  
+  <li>#Markup Values:</li>
+  <li>#0-$49.99         50%</li>
+  <li>#$50-149.99       45%</li>
+  <li>#$150-999.99      35%</li>
+  <li>#$1,000-1,999.99  30%</li>
+  <li>#$2,000-2,999.99  20%</li>
+  <li>#$3,000-3,999.99  15%</li>
+  <li>#$4,000 or Higher 10%</li>
 </ol>
 
 ![Screenshot (25)](https://user-images.githubusercontent.com/115889137/207741161-2d7f9947-78e7-4cbc-810e-84b8ea751485.png)
