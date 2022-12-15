@@ -4,12 +4,15 @@ Electronic Inventory System
 <p>
 This is the Electronic Inventory System.
 It can be used to keep track of all your items and works with a USB (plug/play) barcode scanner.
-You can set low quanity reminders for each item's subcategory, that way you can be notified on the program's startup on what needs to be ordered.
-The program also calculates the total prices of your total inventory (with/without markup).
 </p>
 
 <ul>
-Markup values are hardcoded:
+<li>You can set low quanity reminders for each item's subcategory, that way you can be notified on the program's startup on what needs to be ordered</li>
+<li>The program also calculates the total prices of your total inventory (with/without markup).</li>
+</ul>
+
+<ul>
+  Markup values are hardcoded:
   <li>#Markup Values:</li>
   <li>#0-$49.99         50%</li>
   <li>#$50-149.99       45%</li>
