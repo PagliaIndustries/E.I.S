@@ -9,7 +9,7 @@ The program also calculates the total prices of your total inventory (with/witho
 </p>
 
 <ul>
-  Markup values are hardcoded:
+Markup values are hardcoded:
   <li>#Markup Values:</li>
   <li>#0-$49.99         50%</li>
   <li>#$50-149.99       45%</li>
