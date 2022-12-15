@@ -16,6 +16,11 @@ To install this program you can either:
     </ul>
 </p>
 
+<p>The program's default Login is: <br>
+Admin<br>
+1234
+</p>
+
 <h3>Features</h3>
 <ul>
 <li>You can set low quanity reminders for each item's subcategory, that way you can be notified on the program's startup on what needs to be ordered</li>
