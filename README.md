@@ -18,7 +18,8 @@ To install this program you can either:
 
 <p>The program's default Login is: <br>
 Admin<br>
-1234
+1234<br>
+(This can be changed in the Settings Menu)
 </p>
 
 <h3>Features</h3>
