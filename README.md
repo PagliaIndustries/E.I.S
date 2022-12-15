@@ -8,7 +8,13 @@ It can be used to keep track of all your items and works with a USB (plug/play) 
 
 <h2>Install/Setup</h2>
 <p>
-To install this program...
+To install this program you can either:
+  <ul>
+    <li>Download all the files and make an exe app yourself</li>
+    <li>Download all the files and run the program from the terminal</li>
+    <li>Download the exe app and run it</li>
+    </ul>
+  
 </p>
 
 <h3>Features</h3>
