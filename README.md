@@ -10,7 +10,7 @@ It can be used to keep track of all your items and works with a USB (plug/play) 
 <p>
 To install this program you can either:
   <ul>
-    <li>Download the exe app and run it (Easiest)</li>
+    <li>Download the exe app and run it (Easiest) (The App Can Be Found Under Releases)</li>
     <li>Download all the files and make an exe app yourself (With pyinstaller (Use the LoginScreen.py as the file to make exe))</li>
     <li>Download all the files and run the program from the terminal</li>
     </ul>
