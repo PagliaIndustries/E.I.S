@@ -52,6 +52,3 @@ Markup Values are Hardcoded
 ![Screenshot (26)](https://user-images.githubusercontent.com/115889137/207741692-7a73f963-5ea9-4638-aeae-5c2a9baadfea.png)
 ![Screenshot (28)](https://user-images.githubusercontent.com/115889137/207741693-a14a4048-3887-49d8-b60d-58ef8aebd627.png)
 
-<p><b><i>There is a hidden button (circled in green) in the Settings Menu that will display the passwords for the users so they can be changed/updated</i></b><p>
-  
-![Screenshot (31)](https://user-images.githubusercontent.com/115889137/207746654-6b0edfe9-562b-449a-a9d6-c2fcba7b6d45.jpg)
