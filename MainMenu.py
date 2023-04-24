@@ -55,9 +55,9 @@ class CenterDelegate(QStyledItemDelegate):
         # Call the base class paint method to paint the item
         super().paint(painter, option, index)
 
-class Ui_MainDisplay(QMainWindow):
+class Ui_MainMenu(QMainWindow):
     def __init__(self, parent = None):
-        super(Ui_MainDisplay, self).__init__(parent)
+        super(Ui_MainMenu, self).__init__(parent)
         self.setObjectName("MainDisplay")
         self.resize(1123, 903)
         self.showMaximized()
@@ -673,7 +673,7 @@ class Ui_MainDisplay(QMainWindow):
         print("The Refresh Button was clicked")
         categoryINTchecker() #Check the Low Quantity Values to ensure they're INTs
         #Close and reopen the app (Refresh)
-        self.win = Ui_MainDisplay()
+        self.win = Ui_MainMenu()
         self.win.show()
         self.close()
 #----------------------------------
@@ -1175,7 +1175,7 @@ class Ui_LowQuantityAlertPopup(QtWidgets.QMainWindow):
 #----------------------------------------------------------------------------------------------------
 def main():
     app = QApplication(sys.argv)
-    win = Ui_MainDisplay()
+    win = Ui_MainMenu()
     win.show()
     sys.exit(app.exec_())
 
