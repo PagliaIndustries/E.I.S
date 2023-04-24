@@ -11,6 +11,7 @@
 #----------------------------------------------------------------------------------------------
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 import sqlite3
 from Constants import MaxValue, MainDatabase
 
@@ -163,6 +164,23 @@ class Ui_AddWireMenu(QtWidgets.QMainWindow):
         self.formLayout_2.setWidget(20, QtWidgets.QFormLayout.FieldRole, self.label_2)
         spacerItem7 = QtWidgets.QSpacerItem(20, 25, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.formLayout_2.setItem(21, QtWidgets.QFormLayout.FieldRole, spacerItem7)
+        #Buttons
+        self.UploadImageButton = QtWidgets.QPushButton(self.centralwidget)
+        self.UploadImageButton.setMinimumSize(QtCore.QSize(0, 0))
+        self.UploadImageButton.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.UploadImageButton.setFont(font)
+        self.UploadImageButton.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.UploadImageButton.setStyleSheet("background-color: rgb(225, 225, 225);\n"
+"border-style: outset;\n"
+"border-width: 2px;\n"
+"border-color: black;\n"
+"padding: 4px;")
+        self.UploadImageButton.setObjectName("UploadImageButton")
+        self.formLayout_2.setWidget(22, QtWidgets.QFormLayout.FieldRole, self.UploadImageButton)   
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setMinimumSize(QtCore.QSize(0, 0))
         self.pushButton.setMaximumSize(QtCore.QSize(16777215, 16777215))
@@ -178,7 +196,7 @@ class Ui_AddWireMenu(QtWidgets.QMainWindow):
 "border-color: black;\n"
 "padding: 4px;")
         self.pushButton.setObjectName("pushButton")
-        self.formLayout_2.setWidget(22, QtWidgets.QFormLayout.FieldRole, self.pushButton)
+        self.formLayout_2.setWidget(23, QtWidgets.QFormLayout.FieldRole, self.pushButton)
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setItalic(True)
@@ -207,6 +225,7 @@ class Ui_AddWireMenu(QtWidgets.QMainWindow):
         self.label_3.setText(_translate("AddItemMenu", "*Please generate a custom barcode for this item and enter that barcode number in this field "))
         self.label.setText(_translate("AddItemMenu", "Spool Length (ft)"))
         self.label_2.setText(_translate("AddItemMenu", "*Please provide the full spool length in feet. "))
+        self.UploadImageButton.setText(_translate("AddItemMenu", "Upload Image"))
         self.pushButton.setText(_translate("AddItemMenu", "Submit"))
         self.label_5.setText(_translate("AddItemMenu", "*Please enter the price of one full spool. "))
 
@@ -217,8 +236,9 @@ class Ui_AddWireMenu(QtWidgets.QMainWindow):
 #----------------------------------------------------------------------------------------------------
 #                                  Values for Main_Categories
 #----------------------------------------------------------------------------------------------------
-        MainCategoryListValue = ['Wire']
+        MainCategoryListValue = ['Wire', 'Pipe']
         self.CategoryInput.addItems(MainCategoryListValue)
+        self.CategoryInput.currentIndexChanged.connect(self.onCategoryChanged)
 #----------------------------------------------------------------------------------------------------
 #                                Values for Subcategories
 #----------------------------------------------------------------------------------------------------
@@ -253,12 +273,63 @@ class Ui_AddWireMenu(QtWidgets.QMainWindow):
 #                                       Button Actions
 #----------------------------------------------------------------------------------------------------
         #------------------------------------------
+                        #Upload Image Button
+        #------------------------------------------
+        #When the Upload Image button is clicked -> UploadImageClicked Function
+        UploadImageButton = self.UploadImageButton
+        UploadImageButton.clicked.connect(self.UploadImageClicked)
+        #------------------------------------------
+        #------------------------------------------
                         #Submit Button
         #------------------------------------------
         #When the Submit button is clicked -> submitClicked Function
         SubmitButton = self.pushButton
         SubmitButton.clicked.connect(self.SubmitClicked)
         #------------------------------------------
+
+#------------------------------------------
+#                   Add Pipe
+#------------------------------------------        
+    def onCategoryChanged(self):
+        if self.CategoryInput.currentText() == "Pipe":
+            self.updateUI()
+        else:
+            pass
+
+    # Define the slot function
+    def updateUI(self):
+        self.AddItemTitle.setText("Add Pipe Info")
+        self.PriceLabel.setText("Price")
+        self.label.setText("Pipe Length (ft)")
+        self.label_2.setText("*Please provide the full pipe length in feet. ")
+        self.label_5.setText("*Please enter the price of one full pipe length. ")
+#----------------------------------
+
+#----------------------------------
+    #Upload Image Function
+    def UploadImageClicked(self):
+        #Show file dialog to select an image from Product_Images Folder
+        fname = QFileDialog.getOpenFileName(self, 'Select Image', './Product_Images')[0]
+
+        # If user selects an image
+        if fname:
+            #--------------------------------------------------
+            #Show file dialog to select an image from Product_Images Folder
+            global image_path
+            image_path = fname
+            # If an image was selected
+            if image_path:
+                # Read image data from file
+                with open(image_path, 'rb') as f:
+                    image_data = f.read()
+            else:
+                image_data = None
+            #--------------------------------------------------
+        else:
+            image_path = None
+        
+#----------------------------------
+
 #----------------------------------
     #Submit Function
     def SubmitClicked(self):
@@ -278,7 +349,7 @@ class Ui_AddWireMenu(QtWidgets.QMainWindow):
         ItemPrice = 0
 
         mylist = [ItemName, ItemQuantity, ItemPrice, Description, Category, Subcategory, 
-                Location, Length, Price, TotalLength, Barcode]
+                Location, Length, Price, TotalLength, Barcode, image_path]
 
         #--------------------------------------------------
         #Alert user of any empty values that should not be
@@ -320,9 +391,9 @@ class Ui_AddWireMenu(QtWidgets.QMainWindow):
             cursor = connection.cursor()
             cursor.execute('''
                 insert into items (Name, Quantity, Price_$, Description, Main_Category, Subcategory, 
-                                    Location, Spool_Length_Ft, Spool_Price_$,
-                                    Total_Length_Ft, Barcode)
-                values (?,?,?,?,?,?,?,?,?,?,?)
+                                    Location, Spool_or_Pipe_Length_Ft, Spool_or_Pipe_Price_$,
+                                    Total_Length_Ft, Barcode, Image)
+                values (?,?,?,?,?,?,?,?,?,?,?,?)
                 ''', mylist)
             connection.commit()
             #Close the connection

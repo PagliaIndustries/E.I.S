@@ -3,10 +3,11 @@
 #-----------------------------------------------
 #Electronic Inventory System (EIS)
 #Version 4
-#Last Updated: 03/05/23
+#Last Updated: 04/24/23
 #Developed by Paglia Industries
-#Total Time Spent: 80 hours
+#Total Time Spent: 88 hours
 #-----------------------------------------------
+
 
 #----------------------------------------------------------------------------------------------
 #                                  Table Of Contents/Overview
@@ -39,9 +40,6 @@
 # (1)
 # Make Tutorial(PDF) 
 
-# (2)
-# Fix Category Adding - Main/sub categories should be paired for neatness, User should
-# be able to view categories from A->Z
 # Note: Low Quantity Value only works for Subcategories
 #----------------------------------------------------------------------------------------------
 
@@ -53,7 +51,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QMainWindow,
                                 QGridLayout, QVBoxLayout, QSizePolicy, QSpacerItem, 
                                 QMessageBox,QSpinBox, QComboBox, QTableView,QStyledItemDelegate)
 from PyQt5.QtCore import Qt, QMetaObject, QCoreApplication
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPixmap
 
 import sqlite3
 
@@ -66,6 +64,31 @@ from CategoryINTChecker import categoryINTchecker
 
 from Constants import MainDatabase, MaxValue, UserDatabase
 
+class ImageDelegate(QtWidgets.QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        if index.column() == 0:  # replace with the index of the column that contains the image
+            image_path = index.data()
+            if image_path:
+                image_data = open(image_path, 'rb').read()
+                image = QtGui.QImage.fromData(image_data)
+                if not image.isNull():
+                    painter.save()
+                    # Adjust the size of the image
+                    scaled_pixmap = QtGui.QPixmap.fromImage(image).scaled(200, 200, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+                    # Calculate the position to center the pixmap in the item rectangle
+                    pixmap_x = option.rect.x() + ((option.rect.width() - scaled_pixmap.width()) / 2)
+                    pixmap_y = option.rect.y() + ((option.rect.height() - scaled_pixmap.height()) / 2)
+                    painter.drawPixmap(int(pixmap_x), int(pixmap_y), scaled_pixmap)
+                    painter.restore()
+                    return
+        super().paint(painter, option, index)
+
+class CenterDelegate(QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        # Set the text alignment to center
+        option.displayAlignment = Qt.AlignCenter
+        # Call the base class paint method to paint the item
+        super().paint(painter, option, index)
 
 class Ui_MainDisplay(QMainWindow):
     def __init__(self, parent = None):
@@ -252,20 +275,42 @@ class Ui_MainDisplay(QMainWindow):
 
         self.sbar = self.statusBar()
 
+        #Create the table view
         self.InventoryDisplay = QTableView()
         self.InventoryDisplay.setStyleSheet("background-color: rgb(255, 255, 255);")
+
+        #Set the row height and column width
+        self.InventoryDisplay.verticalHeader().setDefaultSectionSize(160) #80
+        self.InventoryDisplay.horizontalHeader().setDefaultSectionSize(150) #100
+
+        #Set the delegate for the image column
+        image_column = 0  #Replace with the index of the column that contains the image
+        self.InventoryDisplay.setItemDelegateForColumn(image_column, ImageDelegate(self.InventoryDisplay))
+
+        #Set the delegate for all columns to the center delegate
+        delegate = CenterDelegate()
+        self.InventoryDisplay.setItemDelegate(delegate)
+        
+        #Set the column width to a larger value
+        self.InventoryDisplay.setColumnWidth(image_column, 200) #Replace 200 with your desired width
+
+
+        #Set up the model for the table view
         self.InventoryDisplay.setModel(self.model)
         self.InventoryDisplay.clicked.connect(self.findrow)
         self.InventoryDisplay.selectionModel().selectionChanged.connect(self.getCellText)
+
+        #Stretch the columns so you can see the full column names
+        self.InventoryDisplay.setColumnWidth(9, 150) #Set width of column 9 to 150 pixels
+        self.InventoryDisplay.setColumnWidth(10, 150) #Set width of column 10 to 150 pixels
+        self.InventoryDisplay.setColumnWidth(11, 150) #Set width of column 11 to 150 pixels
+        self.InventoryDisplay.horizontalHeader().setStretchLastSection(True)
 
         self.gridLayout.addWidget(self.InventoryDisplay, 4, 1, 1, 2)
         self.setCentralWidget(self.centralwidget)
 
         #Only selects rows (Can still edit cells by double-clicking)
         self.InventoryDisplay.setSelectionBehavior(1)
-        # 0 Selecting single items.
-        # 1 Selecting only rows.
-        # 2 Selecting only columns.
 
         #Sort Columns From A->Z When Their Headers are Clicked
         self.InventoryDisplay.horizontalHeader().sectionClicked.connect(self.header_clicked)
@@ -275,10 +320,10 @@ class Ui_MainDisplay(QMainWindow):
 
         #Call the function to calculate the SellPrice
         self.calculate_sellprice()
-    
+
         #Call the function to calculate the Price/Ft of Wire
         self.calculate_PricePerFt()
-        
+
         #Call the functions to calculate the total inventory values
         self.calculate_TotalValue_NoMarkup()
         self.calculate_TotalValue_Markup()
@@ -405,12 +450,16 @@ class Ui_MainDisplay(QMainWindow):
         #Make Specific Columns Un-Editable/ReadOnly
         #----------------------------------
         class ReadOnlyDelegate(QStyledItemDelegate):
-                def createEditor(self, parent, option, index):
-                        print('This column is Read-Only')
-                        return 
+            def createEditor(self, parent, option, index):
+                print('This column is Read-Only')
+                return
+
+            def initStyleOption(self, option, index):
+                super().initStyleOption(option, index)
+                if index.column() in [2, 4, 6, 7, 9, 11, 12, 13, 15]:
+                    option.displayAlignment = Qt.AlignCenter #Center those columns
 
         delegate = ReadOnlyDelegate(self)
-        self.InventoryDisplay.setItemDelegateForColumn(0, delegate) #ID
         self.InventoryDisplay.setItemDelegateForColumn(2, delegate) #Quantity
         self.InventoryDisplay.setItemDelegateForColumn(4, delegate) #SellPrice
         self.InventoryDisplay.setItemDelegateForColumn(6, delegate) #Main Category
@@ -421,7 +470,7 @@ class Ui_MainDisplay(QMainWindow):
         self.InventoryDisplay.setItemDelegateForColumn(13, delegate) #Total_Length_Ft
         self.InventoryDisplay.setItemDelegateForColumn(15, delegate) #Date Added
         #----------------------------------
-
+    
     #------------------------------------------------------------------------
     #When Price is Updated, Automatically Update Price/Ft When Refresh is Hit
     #------------------------------------------------------------------------
@@ -655,7 +704,7 @@ class Ui_MainDisplay(QMainWindow):
     def IsItWirePopup(self):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Question)
-        msgBox.setText("Is the Item you are adding wire?")
+        msgBox.setText("Is the Item you are adding wire/pipe?")
         msgBox.setWindowTitle("Is it Wire?")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
 

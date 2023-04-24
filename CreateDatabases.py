@@ -9,22 +9,22 @@ def createInventoryDatabase():
         cursor = connection.cursor()
 
         table = """CREATE TABLE IF NOT EXISTS Items
-                (ID INTEGER PRIMARY KEY  AUTOINCREMENT,
-                Name                TEXT    NOT NULL,
-                Quantity            INT     NOT NULL,
-                Price_$             DOUBLE  NOT NULL,
-                Sell_Price_$        DOUBLE,
-                Description         TEXT,
-                Main_Category       TEXT,
-                Subcategory         TEXT,
-                Location            TEXT    NOT NULL,
-                Spool_Length_Ft     INT,
-                Spool_Price_$       DOUBLE  NOT NULL,
-                Spool_Sell_Price_$  DOUBLE,
-                Price_Per_Ft        INT, 
-                Total_Length_Ft     INT,
-                Barcode             INT,
-                Date Updated        datetime default current_timestamp);"""
+                (Image                          TEXT,
+                Name                            TEXT,
+                Quantity                        INT,
+                Price_$                         DOUBLE,
+                Sell_Price_$                    DOUBLE,
+                Description                     TEXT,
+                Main_Category                   TEXT,
+                Subcategory                     TEXT,
+                Location                        TEXT,
+                Spool_or_Pipe_Length_Ft         INT,
+                Spool_or_Pipe_Price_$           DOUBLE,
+                Spool_or_Pipe_Sell_Price_$      DOUBLE,
+                Price_Per_Ft_$                  INT, 
+                Total_Length_Ft                 INT,
+                Barcode                         INT,
+                Date Updated                    datetime default current_timestamp);"""
 
         #Execute the creation of the table
         cursor.execute(table)

@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
 from CreateDatabases import createInventoryDatabase, createUserDatabase
+from CreateImagesFolder import createImageFolder
 from AdminMenu import Ui_MainDisplay
 from MainMenu import Ui_MainMenu
   
@@ -102,9 +103,9 @@ class Ui_Loginscreen(QtWidgets.QMainWindow):
 "\n"
 "\n"
 "Electronic Inventory System (E.I.S)\n"
-"Version: 4\n"
+"Version: 5\n"
 "Developed By: Paglia Industries\n"
-"Last Updated: 03/06/2023\n"
+"Last Updated: 04/24/2023\n"
 "\n"
 "\n"
 ""))
@@ -197,6 +198,8 @@ if __name__ == "__main__":
     createInventoryDatabase()
     #Create the User database if one does not exist
     createUserDatabase()
+    #Create a folder to store Product Images
+    createImageFolder()
     #----------------------------------
 
     sys.exit(app.exec_())
