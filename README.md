@@ -46,6 +46,8 @@ Markup Values are Hardcoded
 
 <h4>Program Snapshots</h4>
 
+![EIS Demo Pic](https://user-images.githubusercontent.com/115889137/234100559-42fb64b0-8bc8-431f-851f-07fcaaa85983.png)
+
 ![Screenshot (25)](https://user-images.githubusercontent.com/115889137/207741161-2d7f9947-78e7-4cbc-810e-84b8ea751485.png)
 
 ![Screenshot (29)](https://user-images.githubusercontent.com/115889137/207741690-25335dfe-0e39-4ec9-b9da-063f3cf181cb.png)
