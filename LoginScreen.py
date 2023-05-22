@@ -103,9 +103,9 @@ class Ui_Loginscreen(QtWidgets.QMainWindow):
 "\n"
 "\n"
 "Electronic Inventory System (E.I.S)\n"
-"Version: 5\n"
+"Version: 6\n"
 "Developed By: Paglia Industries\n"
-"Last Updated: 04/24/2023\n"
+"Last Updated: 05/22/2023\n"
 "\n"
 "\n"
 ""))

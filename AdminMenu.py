@@ -2,10 +2,10 @@
 
 #-----------------------------------------------
 #Electronic Inventory System (EIS)
-#Version 4
-#Last Updated: 04/24/23
+#Version 6
+#Last Updated: 05/22/23
 #Developed by Paglia Industries
-#Total Time Spent: 88 hours
+#Total Time Spent: 90 hours
 #-----------------------------------------------
 
 
@@ -69,19 +69,23 @@ class ImageDelegate(QtWidgets.QStyledItemDelegate):
         if index.column() == 0:  # replace with the index of the column that contains the image
             image_path = index.data()
             if image_path:
-                image_data = open(image_path, 'rb').read()
-                image = QtGui.QImage.fromData(image_data)
-                if not image.isNull():
-                    painter.save()
-                    # Adjust the size of the image
-                    scaled_pixmap = QtGui.QPixmap.fromImage(image).scaled(200, 200, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-                    # Calculate the position to center the pixmap in the item rectangle
-                    pixmap_x = option.rect.x() + ((option.rect.width() - scaled_pixmap.width()) / 2)
-                    pixmap_y = option.rect.y() + ((option.rect.height() - scaled_pixmap.height()) / 2)
-                    painter.drawPixmap(int(pixmap_x), int(pixmap_y), scaled_pixmap)
-                    painter.restore()
-                    return
+                try:
+                    image_data = open(image_path, 'rb').read()
+                    image = QtGui.QImage.fromData(image_data)
+                    if not image.isNull():
+                        painter.save()
+                        # Adjust the size of the image
+                        scaled_pixmap = QtGui.QPixmap.fromImage(image).scaled(200, 200, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+                        # Calculate the position to center the pixmap in the item rectangle
+                        pixmap_x = option.rect.x() + ((option.rect.width() - scaled_pixmap.width()) / 2)
+                        pixmap_y = option.rect.y() + ((option.rect.height() - scaled_pixmap.height()) / 2)
+                        painter.drawPixmap(int(pixmap_x), int(pixmap_y), scaled_pixmap)
+                        painter.restore()
+                        return
+                except FileNotFoundError:
+                    pass
         super().paint(painter, option, index)
+
 
 class CenterDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
@@ -286,14 +290,13 @@ class Ui_MainDisplay(QMainWindow):
         #Set the delegate for the image column
         image_column = 0  #Replace with the index of the column that contains the image
         self.InventoryDisplay.setItemDelegateForColumn(image_column, ImageDelegate(self.InventoryDisplay))
-
+    
         #Set the delegate for all columns to the center delegate
         delegate = CenterDelegate()
         self.InventoryDisplay.setItemDelegate(delegate)
         
         #Set the column width to a larger value
         self.InventoryDisplay.setColumnWidth(image_column, 200) #Replace 200 with your desired width
-
 
         #Set up the model for the table view
         self.InventoryDisplay.setModel(self.model)
@@ -544,56 +547,50 @@ class Ui_MainDisplay(QMainWindow):
 #                     Low Quantity Alert
 #------------------------------------------------------------------------
     def LowQuantityAlert(self):
-        #Connect to the Inventory database
+        # Connect to the Inventory database
         connection = sqlite3.connect(MainDatabase)
         cursor = connection.cursor()
 
-        #Get the item name, Total_Length, & subcategory if it's wire & less than the low quantity value
+        # Get the item name, total length, and subcategory if it's wire and less than the low quantity value
         cursor.execute('''
-            SELECT I.Name as CURRENT
-            from Categories as C, Items as I
-            WHERE C.Subcategory = I.Subcategory 
-            AND I.Main_Category = 'Wire'
-            AND I.Total_Length_Ft < C.Low_Quantity_Value
-            ''')
-        connection.commit()
-        #Return the items with low quantity values
+            SELECT I.Name AS CURRENT, I.Total_Length_Ft, S.Low_Quantity_Value, S.Subcategory
+            FROM Items AS I
+            JOIN Subcategories AS S ON S.Subcategory = I.Subcategory
+            WHERE I.Main_Category = 'Wire'
+            AND I.Total_Length_Ft < S.Low_Quantity_Value
+        ''')
         WireResult = cursor.fetchall()
 
-        #Get the item name, quantity, & subcategory if it's not wire & less than the low quantity value
+        # Get the item name, total length, and subcategory if it's not wire and less than the low quantity value
         cursor.execute('''
-            SELECT I.Name as CURRENT
-            from Categories as C, Items as I
-            WHERE C.Subcategory = I.Subcategory
-            AND I.Main_Category != 'Wire'
-            AND I.Quantity < C.Low_Quantity_Value
-            ''')
-        connection.commit()
-        #Return the items with low quantity values
+            SELECT I.Name AS CURRENT, I.Quantity, S.Low_Quantity_Value, S.Subcategory
+            FROM Items AS I
+            JOIN Subcategories AS S ON S.Subcategory = I.Subcategory
+            WHERE I.Main_Category != 'Wire'
+            AND I.Quantity < S.Low_Quantity_Value
+        ''')
         ItemResult = cursor.fetchall()
 
-        #Close the connection
+        # Close the connection
         connection.close()
 
-        #Convert Results from Tuple to List
-        from itertools import chain
-        LowQuantityItemsList = list(chain.from_iterable(ItemResult))
-        print("StringLowQuantityItems:", LowQuantityItemsList)
-        #Then Convert the List to a String
+        # Extract the item names from the results
+        wire_item_names = [row[0] for row in WireResult]
+        item_names = [row[0] for row in ItemResult]
+
+        # Store the item names in lists
+        LowQuantityItemsList = wire_item_names + item_names
+
+        # Print the list of item names
+        print("Item Names:", LowQuantityItemsList)
+
+        # Convert the list to a comma-separated string
         global LowQuantityItems
-        LowQuantityItems = ", ".join(str(x) for x in LowQuantityItemsList)
+        LowQuantityItems = ', '.join(LowQuantityItemsList)
 
-        #Convert Wire Results from Tuple to List
-        from itertools import chain
-        LowQuantityWireList = list(chain.from_iterable(WireResult))
-        print("StringLowQuantityWire:", LowQuantityWireList)
-        #Then Convert the List to a String
-        global LowQuantityWire
-        LowQuantityWire = ", ".join(str(x) for x in LowQuantityWireList)
-
-        #If Result return an empty list Quanity is good, else call popup
-        if ItemResult == [] and WireResult == []:
-            print("Quantity All Good")  
+        # If the result returns an empty list, quantity is good; else, call the popup
+        if not LowQuantityItemsList:
+            print("Quantity All Good")
         else:
             self.ex = Ui_LowQuantityAlertPopup(parent=self)
             self.ex.show()
@@ -1320,7 +1317,7 @@ class Ui_LowQuantityAlertPopup(QtWidgets.QMainWindow):
         #     Display Low Quantity Item Names 
         #------------------------------------------
         self.TextBrowser.setText("All these items are low in quantity:\n\n" + 
-                                LowQuantityItems + ", " + LowQuantityWire +
+                                LowQuantityItems +
                                 "\n\nBe sure to order more!")
         #------------------------------------------
 
@@ -1594,7 +1591,7 @@ class Ui_SettingsScreen(QtWidgets.QMainWindow):
         self.db.setDatabaseName(MainDatabase)
         self.model = QSqlTableModel()
         self.delrow = -1
-        self.model.setTable("Categories")
+        self.model.setTable("Subcategories")
         self.model.setEditStrategy(QSqlTableModel.OnFieldChange)
         self.model.select()  
         self.CategoryTableView.setModel(self.model) 
@@ -1602,6 +1599,7 @@ class Ui_SettingsScreen(QtWidgets.QMainWindow):
 
         #Hide ID Column (Column 0)
         self.CategoryTableView.setColumnHidden(0, True)
+        self.CategoryTableView.setColumnHidden(3, True)
 
         #Only Selects Cells
         self.CategoryTableView.setSelectionBehavior(0)
@@ -1617,7 +1615,7 @@ class Ui_SettingsScreen(QtWidgets.QMainWindow):
         delegate = ReadOnlyDelegate(self)
         self.CategoryTableView.setItemDelegateForColumn(0, delegate) #ID
         self.CategoryTableView.setItemDelegateForColumn(1, delegate) #Main Category, Name
-        self.CategoryTableView.setItemDelegateForColumn(2, delegate) #SubCategory, Password
+        # self.CategoryTableView.setItemDelegateForColumn(2, delegate) #LowQuantityValue, Password
         
         #------------------------------------------
         #          Other Database Dropdown

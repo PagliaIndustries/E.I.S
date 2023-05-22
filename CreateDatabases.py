@@ -32,32 +32,58 @@ def createInventoryDatabase():
         #Commit the changes
         connection.commit()
 
-        #Create the Categories Table
+#-------------------
+        # -------------------
+        # Create Categories table
+        # -------------------
         table2 = """CREATE TABLE IF NOT EXISTS Categories
-                (ID INTEGER PRIMARY KEY  AUTOINCREMENT,
-                Main_Category       TEXT,
-                Subcategory         TEXT,
-                Low_Quantity_Value  INT);"""
- 
-        #Execute the creation of the table
+                (ID INTEGER PRIMARY KEY,
+                Main_Category TEXT);"""
+        # Execute the creation of the table
         cursor.execute(table2)
-        #print("The database has been created")
-        #Commit the changes
+        # Commit the changes
         connection.commit()
 
-        #Add default values to the table:
-        defaultValues = cursor.execute(
-        """SELECT COUNT(*) FROM Categories """).fetchone()[0]
-        if defaultValues == 0:      
-                #Add a default category
-                cursor.execute('''
-                INSERT into Categories (Main_Category, Subcategory, Low_Quantity_Value)
-                VALUES ('N/A','N/A','0')
-                ''')
-                connection.commit()
-                connection.close()
-        else:
-                connection.close() 
+        # -------------------
+        # Create Subcategories table
+        # -------------------
+        # Create Subcategories table
+        table3 = """CREATE TABLE IF NOT EXISTS Subcategories
+                (id INTEGER PRIMARY KEY,
+                Subcategory TEXT,
+                Low_Quantity_Value INTEGER,
+                category_id INTEGER,
+                FOREIGN KEY (category_id) REFERENCES Categories(ID));"""
+
+        # Execute the creation of the table
+        cursor.execute(table3)
+        # Commit the changes
+        connection.commit()
+#------------------------------
+        # Print the contents of the Items table
+        cursor.execute("SELECT * FROM Items")
+        items_data = cursor.fetchall()
+        print("Items:")
+        for item in items_data:
+                print(item)
+
+        # Print the contents of the Categories table
+        cursor.execute("SELECT * FROM Categories")
+        categories_data = cursor.fetchall()
+        print("Categories:")
+        for category in categories_data:
+                print(category)
+
+        # Print the contents of the Subcategories table
+        cursor.execute("SELECT * FROM Subcategories")
+        subcategories_data = cursor.fetchall()
+        print("Subcategories:")
+        for subcategory in subcategories_data:
+                print(subcategory)
+
+        # Close the database connection
+        connection.close()
+#------------------------------
 #----------------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------------

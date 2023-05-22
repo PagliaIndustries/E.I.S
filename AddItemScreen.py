@@ -196,6 +196,8 @@ class Ui_AddItemMenu(QtWidgets.QMainWindow):
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
 
+        self.image_path = None #Declare image_path at the class level
+
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("AddItemMenu", "Add Item Window"))
@@ -216,51 +218,63 @@ class Ui_AddItemMenu(QtWidgets.QMainWindow):
 #----------------------------------------------------------------------------------------------------
 #                                            Values
 #----------------------------------------------------------------------------------------------------
-#                                  Values for Main_Categories
-#----------------------------------------------------------------------------------------------------
-        #Connect to the Category database
+        # Connect to the Category database
         connection = sqlite3.connect(MainDatabase)
         cursor = connection.cursor()
-        #Don't display the blank values and order results A->Z
+
+        # ------------------------------------------
+        # Main Category Dropdown
+        # ------------------------------------------
         cursor.execute('''SELECT DISTINCT Main_Category FROM Categories WHERE Main_Category IS NOT NULL 
-                AND Main_Category <> '' ORDER BY Main_Category ASC''')
-        connection.commit()
-        
-        #Get the Categories from the Database
-        CategoryList = cursor.fetchall()
+                        AND Main_Category <> '' ORDER BY Main_Category ASC''')
+        main_category_data = cursor.fetchall()
 
-        #Convert the SQL Results to a String List
-        from itertools import chain
-        StringCategoryList = list(chain.from_iterable(CategoryList))
-     
-        #Close the connection
+        # Convert the SQL Results to a String List
+        main_category_combo_data = [row[0] for row in main_category_data]
+
+        # Close the connection
         connection.close()
 
-        #Add the SQL Results to the Dropdown List
-        self.CategoryInput.addItems(StringCategoryList)
-#----------------------------------------------------------------------------------------------------
-#                                Values for Subcategories
-#----------------------------------------------------------------------------------------------------
-        #Connect to the Category database
-        connection = sqlite3.connect(MainDatabase)
-        cursor = connection.cursor()
-        #Don't display the blank values and order results A->Z
-        cursor.execute('''SELECT DISTINCT Subcategory FROM Categories WHERE Subcategory IS NOT NULL 
-                AND Subcategory <> '' ORDER BY Subcategory ASC''')
-        connection.commit()
-        
-        #Get the Categories from the Database
-        CategoryList = cursor.fetchall()
+        # Add the Main Categories to the Dropdown List
+        self.CategoryInput.addItems(main_category_combo_data)
 
-        #Convert the SQL Results to a String List
-        from itertools import chain
-        StringCategoryList = list(chain.from_iterable(CategoryList))
-     
-        #Close the connection
-        connection.close()
+        # ------------------------------------------
+        # Function to retrieve and display associated subcategories
+        # ------------------------------------------
+        def displayAssociatedSubcategories():
+            # Get the selected main category
+            selected_main_category = self.CategoryInput.currentText()
 
-        #Add the SQL Results to the Dropdown List
-        self.SubcategoryComboBox.addItems(StringCategoryList)
+            # Connect to the Category database
+            connection = sqlite3.connect(MainDatabase)
+            cursor = connection.cursor()
+
+            # Retrieve associated subcategories for the selected main category
+            cursor.execute('''SELECT DISTINCT Subcategory FROM Subcategories
+                            WHERE category_id IN (
+                                SELECT ID FROM Categories
+                                WHERE Main_Category = ?
+                            )
+                            AND Subcategory IS NOT NULL 
+                            AND Subcategory <> ''
+                            ORDER BY Subcategory ASC''', (selected_main_category,))
+
+            # Get the Subcategories from the Database
+            subcategory_data = cursor.fetchall()
+
+            # Convert the SQL Results to a String List
+            subcategory_combo_data = [row[0] for row in subcategory_data]
+
+            # Close the connection
+            connection.close()
+
+            # Clear and update the SubcategoryComboBox
+            self.SubcategoryComboBox.clear()
+            self.SubcategoryComboBox.addItems(subcategory_combo_data)
+
+        # Connect the onCategorySelected function to the CategoryInput's currentIndexChanged signal
+        self.CategoryInput.currentIndexChanged.connect(displayAssociatedSubcategories)
+
 #----------------------------------------------------------------------------------------------------
 #                           Max Value for Price & Quantity SpinBox
 #----------------------------------------------------------------------------------------------------
@@ -288,26 +302,18 @@ class Ui_AddItemMenu(QtWidgets.QMainWindow):
 #----------------------------------
     #Upload Image Function
     def UploadImageClicked(self):
-        #Show file dialog to select an image from Product_Images Folder
+        # Show file dialog to select an image from Product_Images Folder
         fname = QFileDialog.getOpenFileName(self, 'Select Image', './Product_Images')[0]
 
         # If user selects an image
         if fname:
-            #--------------------------------------------------
-            #Show file dialog to select an image from Product_Images Folder
-            global image_path
-            image_path = fname
-            # If an image was selected
-            if image_path:
-                # Read image data from file
-                with open(image_path, 'rb') as f:
-                    image_data = f.read()
-            else:
-                image_data = None
-            #--------------------------------------------------
+            # Update the image_path variable
+            self.image_path = fname
+            # Read image data from file
+            with open(self.image_path, 'rb') as f:
+                image_data = f.read()
         else:
-            image_path = None
-        
+            self.image_path = None
 #----------------------------------
     #Submit Function
     def SubmitClicked(self):
@@ -326,8 +332,12 @@ class Ui_AddItemMenu(QtWidgets.QMainWindow):
         Length = 0
         TotalLength = Length
 
+        if self.image_path is None:
+            self.image_path = "./Product_Images/na.jpg"  # Default image path
+        
+
         mylist = [ItemName, Quantity, Price,  Description, Category, Subcategory, 
-                Location, Length, SpoolPrice, TotalLength, Barcode , image_path]
+                Location, Length, SpoolPrice, TotalLength, Barcode , self.image_path]
 
         #--------------------------------------------------
         #Alert user of any empty values that should not be

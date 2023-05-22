@@ -170,25 +170,6 @@ class Ui_CategoryEdit(QtWidgets.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 #----------------------------------------------------------------------------------------------
         #------------------------------------------
-        #             Connect to Database
-        #------------------------------------------
-        conn = sqlite3.connect('inventory.db')
-        c = conn.cursor()
-        #Don't display the blank values and order results A->Z
-        c.execute('''SELECT DISTINCT Main_Category FROM Categories WHERE Main_Category IS NOT NULL 
-                AND Main_Category <> '' ORDER BY Main_Category ASC''')
-        data = c.fetchall()
-        c.close()
-        combo_data = []
-        for row in data:
-                combo_data.append(row[0])
-        #------------------------------------------
-        #             Category Dropdown
-        #------------------------------------------
-        CategoryComboBox = self.CategoryComboBox
-        CategoryComboBox.addItems(combo_data)
-        CategoryComboBox.show()
-        #------------------------------------------
         #            Add Category Button
         #------------------------------------------
         #When the Add button is clicked -> AddCategoryClicked Function
@@ -197,54 +178,105 @@ class Ui_CategoryEdit(QtWidgets.QMainWindow):
         #------------------------------------------
         #---------------------------------------------------------------
         #------------------------------------------
-        #             Connect to Database
-        #------------------------------------------
-        conn = sqlite3.connect('inventory.db')
-        c = conn.cursor()
-        #Don't display the blank values and order results A->Z
-        c.execute('''SELECT DISTINCT Subcategory FROM Categories WHERE Subcategory IS NOT NULL 
-                AND Subcategory <> '' ORDER BY Subcategory ASC''')
-        data = c.fetchall()
-        c.close()
-        combo_data = []
-        for row in data:
-                combo_data.append(row[0])
-        #------------------------------------------
-        #             SubCategory Dropdown
-        #------------------------------------------
-        SubCategoryComboBox = self.SubCategoryCombobox
-        SubCategoryComboBox.addItems(combo_data)
-        SubCategoryComboBox.show()
-        #------------------------------------------
         #            Add SubCategory Button
         #------------------------------------------
         #When the Add button is clicked -> AddCategoryClicked Function
         AddSubCategoryButton = self.AddSubCategoryButton
         AddSubCategoryButton.clicked.connect(self.AddSubCategoryClicked)
+        #---------------------------------------------------------------
+
+        # ------------------------------------------
+        # Connect to Database
+        # ------------------------------------------
+        conn = sqlite3.connect('inventory.db')
+        c = conn.cursor()
+        # Don't display the blank values and order results A->Z
+        c.execute('''SELECT DISTINCT Main_Category FROM Categories WHERE Main_Category IS NOT NULL 
+                AND Main_Category <> '' ORDER BY Main_Category ASC''')
+        main_category_data = c.fetchall()
+        c.close()
+        main_category_combo_data = []
+        for row in main_category_data:
+                main_category_combo_data.append(row[0])
+
+        # ------------------------------------------
+        # Category Dropdown
+        # ------------------------------------------
+        CategoryComboBox = self.CategoryComboBox
+        CategoryComboBox.addItems(main_category_combo_data)
+        CategoryComboBox.currentIndexChanged.connect(self.onCategorySelected)
+        CategoryComboBox.show()
+        # ------------------------------------------
+        # SubCategory Dropdown
+        # ------------------------------------------
+        SubCategoryComboBox = self.SubCategoryCombobox
+        SubCategoryComboBox.show()
+        
+        #------------------------------------------
+        # When Main category is Changed Display Associated Subcategories
+        #------------------------------------------
+    def onCategorySelected(self):
+        selected_main_category = self.CategoryComboBox.currentText()
+
+        # Connect to Database
+        conn = sqlite3.connect('inventory.db')
+        c = conn.cursor()
+
+        # Retrieve subcategories for the selected main category using a JOIN and additional condition
+        c.execute('''SELECT DISTINCT S.Subcategory 
+                        FROM Subcategories S 
+                        JOIN Categories C ON S.category_id = C.ID 
+                        WHERE C.Main_Category = ? 
+                        AND S.Subcategory IS NOT NULL 
+                        AND S.Subcategory <> '' 
+                        AND C.Main_Category = ? 
+                        ORDER BY S.Subcategory ASC''', (selected_main_category, selected_main_category))
+        subcategory_data = c.fetchall()
+        c.close()
+
+        subcategory_combo_data = []
+        for row in subcategory_data:
+                subcategory_combo_data.append(row[0])
+
+        # Clear and update the SubCategoryComboBox
+        self.SubCategoryCombobox.clear()
+        self.SubCategoryCombobox.addItems(subcategory_combo_data)
+        #------------------------------------------
+
         #------------------------------------------
         #       Add SubCategory Clicked Function
         #------------------------------------------
     def AddSubCategoryClicked(self):
-        #Define LowQuantitySpinBox
-        self.LowQuantityValueSpinBox.setMaximum(MaxValue) #Set Max Value for SpinBox
-        LowQuantityValue = self.LowQuantityValueSpinBox.text() #Get the SpinBox's Current Value
-        #Define SubCategory Input
-        NewSubCategory = self.SubCategoryLineEdit.text()
-        print("SubCategory Add Button Clicked")
-        if NewSubCategory == "":
-             print("Nothing new to add")
-        else:
-             NewSubCategoryValues = [NewSubCategory, LowQuantityValue]
-             conn = sqlite3.connect('inventory.db')
-             c = conn.cursor()
-             c.execute('''INSERT into Categories (Subcategory, Low_Quantity_Value) values (?,?)''', NewSubCategoryValues)
-             conn.commit()
-             c.close()
+        # Define LowQuantitySpinBox
+        self.LowQuantityValueSpinBox.setMaximum(MaxValue) # Set Max Value for SpinBox
+        LowQuantityValue = self.LowQuantityValueSpinBox.text() # Get the SpinBox's Current Value
         
-        #Close and reopen the app (Refresh to see changes)
-        self.win = Ui_CategoryEdit()
-        self.win.show()
-        self.close()
+        # Define SubCategory Input
+        NewSubCategory = self.SubCategoryLineEdit.text()
+        
+        # Get the currently selected main category
+        selected_main_category = self.CategoryComboBox.currentText()
+
+        print("SubCategory Add Button Clicked")
+        
+        if NewSubCategory == "":
+                print("Nothing new to add")
+        else:
+                # Insert the new subcategory into the Subcategories table and associate it with the selected main category
+                conn = sqlite3.connect('inventory.db')
+                c = conn.cursor()
+                c.execute('''INSERT INTO Subcategories (Subcategory, category_id, Low_Quantity_Value)
+                        VALUES (?, (SELECT ID FROM Categories WHERE Main_Category = ?), ?)''',
+                        (NewSubCategory, selected_main_category, LowQuantityValue))
+                conn.commit()
+                c.close()
+
+        # Refresh the SubCategory dropdown to display the updated list
+        self.onCategorySelected()
+        
+        # Clear the input fields
+        self.SubCategoryLineEdit.clear()
+        self.LowQuantityValueSpinBox.clear()
         #------------------------------------------
         #        Add Category Clicked Function 
         #------------------------------------------
